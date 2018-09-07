@@ -7,7 +7,7 @@ public class ObjectPooler : MonoBehaviour {
     public int pooledAmt;
 
     List<GameObject> pooledObjects = new List<GameObject>();
-/*
+
 	void Start () {
         pooledObjects = new List<GameObject>();
         for (int i = 0; i < pooledAmt; i++){
@@ -17,7 +17,7 @@ public class ObjectPooler : MonoBehaviour {
 
         }
 	}
-*/
+
     public GameObject GetPooledObject() {
         for (int i = 0; i<pooledObjects.Count; i++)
         {

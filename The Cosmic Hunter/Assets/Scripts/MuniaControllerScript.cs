@@ -10,6 +10,7 @@ public class MuniaControllerScript : MonoBehaviour {
     bool facingRight = true;
 
     bool isGrounded;
+    bool ultActive = false;
     public Transform feetPos;
     public float checkRadius;
     public LayerMask whatIsGround;
@@ -19,7 +20,8 @@ public class MuniaControllerScript : MonoBehaviour {
     public float jumpTime;
     public static MuniaControllerScript instance;
 
-    public ObjectPooler theObjectPool;
+    //public ObjectPooler theObjectPool;
+    public GameObject ObjectPool;
 
     private void Awake()
     {
@@ -38,6 +40,7 @@ public class MuniaControllerScript : MonoBehaviour {
     }
 
 	void Update () {
+
         psprite = gameObject.GetComponent<SpriteRenderer>();
         isGrounded = Physics2D.OverlapCircle(feetPos.position, checkRadius, whatIsGround);
         if (isGrounded == true)
@@ -49,18 +52,33 @@ public class MuniaControllerScript : MonoBehaviour {
             jumpTimeCounter = jumpTime;
             rb.velocity = Vector2.up * jumpForce;
         }
-        if (Input.GetKey(KeyCode.Space) && isJumping == true) {
-            if (jumpTimeCounter > 0)
+        if (!anim.GetCurrentAnimatorStateInfo(0).IsName("Attack"))
+        {
+            if (Input.GetKey(KeyCode.Space) && isJumping == true)
             {
-                rb.velocity = Vector2.up * jumpForce;
-                jumpTimeCounter -= Time.deltaTime;
+                if (jumpTimeCounter > 0)
+                {
+                    rb.velocity = Vector2.up * jumpForce;
+                    jumpTimeCounter -= Time.deltaTime;
+                }
+                else
+                {
+                    isJumping = false;
+                }
             }
-            else {
+            if (Input.GetKeyUp(KeyCode.Space))
+            {
                 isJumping = false;
             }
-        }
-        if (Input.GetKeyUp(KeyCode.Space)) {
-            isJumping = false;
+            if (Input.GetKeyDown(KeyCode.U))
+            {
+                if (ultActive == false) ultActive = true;
+                else ultActive = false;
+            }
+            if (Input.GetKeyDown(KeyCode.N))
+            {
+                anim.SetTrigger("attack");
+            }
         }
         if (rb.velocity.y != 0)
         {
@@ -74,27 +92,30 @@ public class MuniaControllerScript : MonoBehaviour {
                 anim.SetBool("isFalling", false);
             }
         }
-        if (rb.velocity.magnitude > 0)
+        if (ultActive == true)
         {
-            GameObject newGhost = theObjectPool.GetPooledObject();
-            newGhost.transform.position = transform.position;
-            newGhost.transform.rotation = transform.rotation;
-            
-            newGhost.SetActive(true);
-            
+            if (rb.velocity.magnitude > 0)
+            {
+                newObjectPooler activate = GameObject.Find("ObjectPooler").GetComponent<newObjectPooler>();
+                activate.ActivateObject();
+
+            }
         }
-        
     }
 
     void FixedUpdate()
     {
-        float move = Input.GetAxis("Horizontal");
-        anim.SetFloat("Speed", Mathf.Abs(move));
-        rb.velocity = new Vector2(move * maxSpeed, rb.velocity.y);
+        if (!anim.GetCurrentAnimatorStateInfo(0).IsName("Attack"))
+            {
+            float move = Input.GetAxis("Horizontal");
+            anim.SetFloat("Speed", Mathf.Abs(move));
+            rb.velocity = new Vector2(move * maxSpeed, rb.velocity.y);
 
-        if (move > 0 && !facingRight)
-            Flip();
-        else if (move < 0 && facingRight)
-            Flip();
+            if (move > 0 && !facingRight)
+                Flip();
+            else if (move < 0 && facingRight)
+                Flip();
+        }
     }
+
 }
