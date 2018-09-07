@@ -7,8 +7,15 @@ public class MuniaControllerScript : MonoBehaviour {
     Rigidbody2D rb;
     Animator anim;
     public SpriteRenderer psprite;
-    bool facingRight = true;
+    
 
+    public AudioClip[] attackClips = new AudioClip[0];
+    public AudioClip[] jumpClips = new AudioClip[0];
+    public AudioSource voiceSource;
+    int index;
+    public AudioSource lol;
+
+    bool facingRight = true;
     bool isGrounded;
     bool ultActive = false;
     public Transform feetPos;
@@ -18,9 +25,9 @@ public class MuniaControllerScript : MonoBehaviour {
     public float jumpForce;
     float jumpTimeCounter;
     public float jumpTime;
+
     public static MuniaControllerScript instance;
 
-    //public ObjectPooler theObjectPool;
     public GameObject ObjectPool;
 
     private void Awake()
@@ -30,7 +37,6 @@ public class MuniaControllerScript : MonoBehaviour {
     void Start () {
         rb = gameObject.GetComponent<Rigidbody2D>();
         anim = gameObject.GetComponent<Animator>();
-        
 	}
     void Flip() {
         facingRight = !facingRight;
@@ -51,6 +57,9 @@ public class MuniaControllerScript : MonoBehaviour {
             isJumping = true;
             jumpTimeCounter = jumpTime;
             rb.velocity = Vector2.up * jumpForce;
+            index = Random.Range(0, jumpClips.Length);
+            voiceSource.clip = jumpClips[index];
+            voiceSource.Play();
         }
         if (!anim.GetCurrentAnimatorStateInfo(0).IsName("Attack"))
         {
@@ -72,12 +81,24 @@ public class MuniaControllerScript : MonoBehaviour {
             }
             if (Input.GetKeyDown(KeyCode.U))
             {
-                if (ultActive == false) ultActive = true;
-                else ultActive = false;
+                if (ultActive == false)
+                {
+                    ultActive = true;
+                    
+                    lol.Play();
+                }
+                else
+                {
+                    ultActive = false;
+                    lol.Pause();
+                }
             }
             if (Input.GetKeyDown(KeyCode.N))
             {
                 anim.SetTrigger("attack");
+                index = Random.Range(0, attackClips.Length);
+                voiceSource.clip = attackClips[index];
+                voiceSource.Play();
             }
         }
         if (rb.velocity.y != 0)
