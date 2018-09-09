@@ -7,7 +7,7 @@ public class movingPlatform : MonoBehaviour {
     private Vector3 posA;
     private Vector3 posB;
     private Vector3 nextPos;
-
+    
     public float speed;
 
     public Transform childTransform;
@@ -21,7 +21,7 @@ public class movingPlatform : MonoBehaviour {
 	}
 	
 
-	void Update () {
+	void FixedUpdate () {
         Move();
 	}
     private void Move() {
