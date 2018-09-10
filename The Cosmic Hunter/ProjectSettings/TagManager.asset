@@ -18,7 +18,7 @@ TagManager:
   - Player
   - Ground
   - Enemy
-  - 
+  - BG
   - 
   - 
   - 
@@ -48,6 +48,9 @@ TagManager:
     locked: 0
   - name: Enemy
     uniqueID: 2985587137
+    locked: 0
+  - name: Effects
+    uniqueID: 2899850237
     locked: 0
   - name: Player
     uniqueID: 3410444317

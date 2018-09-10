@@ -29,12 +29,13 @@ public class MuniaControllerScript : MonoBehaviour {
     public float attackRange;
     public LayerMask whatIsEnemy;
     public CameraShake cameraShake;
+    public GameObject attackEffect;
 
     public float knockback;
-    public float knockbackLength;
-    public float knockbackCount;
+    
     public bool knockFromRight;
-
+    public bool knockbackBool = false;
+    public int knockbackState = 0;
 
     public static MuniaControllerScript instance;
 
@@ -65,9 +66,9 @@ public class MuniaControllerScript : MonoBehaviour {
             voiceSource.clip = jumpClips[index];
             voiceSource.Play();
         }
-        if (!anim.GetCurrentAnimatorStateInfo(0).IsName("Attack")) // jump higher
+        if (!anim.GetCurrentAnimatorStateInfo(0).IsName("Attack")) //not working if attacking
         {
-            if (Input.GetKey(KeyCode.Space) && isJumping == true)
+            if (Input.GetKey(KeyCode.Space) && isJumping == true) // jump higher
             {
                 if (jumpTimeCounter > 0)
                 {
@@ -89,12 +90,12 @@ public class MuniaControllerScript : MonoBehaviour {
                 {
                     ultActive = true;
                     
-                    lol.Play();
+                    //lol.Play();
                 }
                 else
                 {
                     ultActive = false;
-                    lol.Pause();
+                    //lol.Pause();
                 }
             }
             if (Input.GetKeyDown(KeyCode.N)) //attack
@@ -123,17 +124,9 @@ public class MuniaControllerScript : MonoBehaviour {
 
             }
         }
-    }
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(attackPos.position, attackRange);
-    }
-    void FixedUpdate()
-    {
-        if (!anim.GetCurrentAnimatorStateInfo(0).IsName("Attack") ) //left and right
-            {
-            if (knockbackCount <= 0)
+        if (!anim.GetCurrentAnimatorStateInfo(0).IsName("Attack")) //left and right
+        {
+            if (knockbackBool == false)
             {
                 float move = Input.GetAxis("Horizontal");
                 anim.SetFloat("Speed", Mathf.Abs(move));
@@ -146,9 +139,19 @@ public class MuniaControllerScript : MonoBehaviour {
             }
             else
             {
+
                 KnockBack();
             }
         }
+    }
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(attackPos.position, attackRange);
+    }
+    void FixedUpdate()
+    {
+        
         
     }
     void Flip() //direction facing
@@ -164,28 +167,47 @@ public class MuniaControllerScript : MonoBehaviour {
         index = Random.Range(0, attackClips.Length);
         voiceSource.clip = attackClips[index];
         voiceSource.Play();
-
-        Collider2D[] enemiesToDamage = Physics2D.OverlapCircleAll(attackPos.position, attackRange, whatIsEnemy);
-        if (enemiesToDamage.Length > 0)
-        {
-            StartCoroutine(cameraShake.Shake(.15f, .4f));
-        }
-        for (int i = 0; i < enemiesToDamage.Length; i++)
-        {
-            enemiesToDamage[i].GetComponent<enemyScript>().TakeDamage();
-
-        }
+        
     }
     public void KnockBack()
     {
         if (knockFromRight == true)
         {
             rb.velocity = new Vector2(-knockback, knockback);
+            //rb.AddForce(-transform.right*knockback);
+            //rb.AddForce(transform.up * knockback);
         }
         else
         {
             rb.velocity = new Vector2(knockback, knockback);
+            //rb.AddForce(transform.right * knockback);
+            //rb.AddForce(transform.up * knockback);
         }
-        knockbackCount -= Time.deltaTime;
+        
+        StartCoroutine(KnockbackStun());
     }
+    IEnumerator KnockbackStun() {
+        yield return new WaitForSeconds(0.2f);
+        knockbackBool = false;
+    }
+    public void Slash() {
+        if (attackEffect.activeInHierarchy == true)
+        {
+            attackEffect.SetActive(false);
+        }
+        else
+        {
+            attackEffect.SetActive(true);
+            Collider2D[] enemiesToDamage = Physics2D.OverlapCircleAll(attackPos.position, attackRange, whatIsEnemy);
+            if (enemiesToDamage.Length > 0)
+            {
+                StartCoroutine(cameraShake.Shake(.15f, .4f));
+            }
+            for (int i = 0; i < enemiesToDamage.Length; i++)
+            {
+                enemiesToDamage[i].GetComponent<enemyScript>().TakeDamage();
+
+            }
+        }
+        }
 }
