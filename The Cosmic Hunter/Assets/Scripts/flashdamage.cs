@@ -8,16 +8,9 @@ public class flashdamage : MonoBehaviour
     SpriteRenderer spriteR;
     Color[] flashbetween = { Color.white, Color.red };
 
-    // Use this for initialization
     void Start()
     {
         spriteR = GetComponent<SpriteRenderer>();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
     }
 
     void OnCollisionEnter2D(Collision2D col)

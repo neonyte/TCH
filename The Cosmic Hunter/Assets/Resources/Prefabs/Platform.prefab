@@ -20,8 +20,9 @@ GameObject:
   m_Component:
   - component: {fileID: 4048048901196186}
   - component: {fileID: 212049371649078958}
-  - component: {fileID: 61486778527727584}
   - component: {fileID: 251705221450330670}
+  - component: {fileID: 68758862230471062}
+  - component: {fileID: 61366158502266166}
   m_Layer: 9
   m_Name: Platform
   m_TagString: Untagged
@@ -36,13 +37,13 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1351604089730252}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -6.56, y: -0.53, z: 0}
+  m_LocalPosition: {x: -48.4, y: -4.73, z: 0.03750635}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!61 &61486778527727584
+--- !u!61 &61366158502266166
 BoxCollider2D:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -54,7 +55,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 1
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0, y: -0.051761627}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -65,8 +66,25 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 9.86, y: 2.75}
+  m_Size: {x: 9.86, y: 2.6464767}
   m_EdgeRadius: 0
+--- !u!68 &68758862230471062
+EdgeCollider2D:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1351604089730252}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 1
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 1.33}
+  m_EdgeRadius: 0
+  m_Points:
+  - {x: -4.93, y: 0}
+  - {x: 4.93, y: 0}
 --- !u!212 &212049371649078958
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -125,7 +143,7 @@ PlatformEffector2D:
     serializedVersion: 2
     m_Bits: 4294967295
   m_RotationalOffset: 0
-  m_UseOneWay: 1
+  m_UseOneWay: 0
   m_UseOneWayGrouping: 0
   m_SurfaceArc: 180
   m_UseSideFriction: 0

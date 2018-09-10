@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MuniaControllerScript : MonoBehaviour {
     public float maxSpeed = 10f;
-    Rigidbody2D rb;
+    public Rigidbody2D rb;
     Animator anim;
     public SpriteRenderer psprite;
     
@@ -25,6 +25,16 @@ public class MuniaControllerScript : MonoBehaviour {
     public float jumpForce;
     float jumpTimeCounter;
     public float jumpTime;
+    public Transform attackPos;
+    public float attackRange;
+    public LayerMask whatIsEnemy;
+    public CameraShake cameraShake;
+
+    public float knockback;
+    public float knockbackLength;
+    public float knockbackCount;
+    public bool knockFromRight;
+
 
     public static MuniaControllerScript instance;
 
@@ -38,12 +48,6 @@ public class MuniaControllerScript : MonoBehaviour {
         rb = gameObject.GetComponent<Rigidbody2D>();
         anim = gameObject.GetComponent<Animator>();
 	}
-    void Flip() {
-        facingRight = !facingRight;
-        Vector3 theScale = transform.localScale;
-        theScale.x *= -1;
-        transform.localScale = theScale;
-    }
 
 	void Update () {
 
@@ -53,7 +57,7 @@ public class MuniaControllerScript : MonoBehaviour {
         {
             anim.SetBool("isGrounded", true);
         }
-        if (isGrounded == true && Input.GetKeyDown(KeyCode.Space)) {
+        if (isGrounded == true && Input.GetKeyDown(KeyCode.Space)) { // jump
             isJumping = true;
             jumpTimeCounter = jumpTime;
             rb.velocity = Vector2.up * jumpForce;
@@ -61,7 +65,7 @@ public class MuniaControllerScript : MonoBehaviour {
             voiceSource.clip = jumpClips[index];
             voiceSource.Play();
         }
-        if (!anim.GetCurrentAnimatorStateInfo(0).IsName("Attack"))
+        if (!anim.GetCurrentAnimatorStateInfo(0).IsName("Attack")) // jump higher
         {
             if (Input.GetKey(KeyCode.Space) && isJumping == true)
             {
@@ -79,7 +83,7 @@ public class MuniaControllerScript : MonoBehaviour {
             {
                 isJumping = false;
             }
-            if (Input.GetKeyDown(KeyCode.U))
+            if (Input.GetKeyDown(KeyCode.U)) //ult
             {
                 if (ultActive == false)
                 {
@@ -93,15 +97,12 @@ public class MuniaControllerScript : MonoBehaviour {
                     lol.Pause();
                 }
             }
-            if (Input.GetKeyDown(KeyCode.N))
+            if (Input.GetKeyDown(KeyCode.N)) //attack
             {
-                anim.SetTrigger("attack");
-                index = Random.Range(0, attackClips.Length);
-                voiceSource.clip = attackClips[index];
-                voiceSource.Play();
+                AttackAndDamage();
             }
         }
-        if (rb.velocity.y != 0)
+        if (rb.velocity.y != 0) // jumping and falling animations
         {
             anim.SetBool("isGrounded", false);
             if (rb.velocity.y < 0)
@@ -113,7 +114,7 @@ public class MuniaControllerScript : MonoBehaviour {
                 anim.SetBool("isFalling", false);
             }
         }
-        if (ultActive == true)
+        if (ultActive == true) //ult mechanics
         {
             if (rb.velocity.magnitude > 0)
             {
@@ -123,20 +124,68 @@ public class MuniaControllerScript : MonoBehaviour {
             }
         }
     }
-
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(attackPos.position, attackRange);
+    }
     void FixedUpdate()
     {
-        if (!anim.GetCurrentAnimatorStateInfo(0).IsName("Attack"))
+        if (!anim.GetCurrentAnimatorStateInfo(0).IsName("Attack") ) //left and right
             {
-            float move = Input.GetAxis("Horizontal");
-            anim.SetFloat("Speed", Mathf.Abs(move));
-            rb.velocity = new Vector2(move * maxSpeed, rb.velocity.y);
+            if (knockbackCount <= 0)
+            {
+                float move = Input.GetAxis("Horizontal");
+                anim.SetFloat("Speed", Mathf.Abs(move));
+                rb.velocity = new Vector2(move * maxSpeed, rb.velocity.y);
 
-            if (move > 0 && !facingRight)
-                Flip();
-            else if (move < 0 && facingRight)
-                Flip();
+                if (move > 0 && !facingRight)
+                    Flip();
+                else if (move < 0 && facingRight)
+                    Flip();
+            }
+            else
+            {
+                KnockBack();
+            }
+        }
+        
+    }
+    void Flip() //direction facing
+    {
+        facingRight = !facingRight; 
+        Vector3 theScale = transform.localScale;
+        theScale.x *= -1;
+        transform.localScale = theScale;
+    }
+    void AttackAndDamage() {
+        anim.SetTrigger("attack");
+        jumpTimeCounter = 0;
+        index = Random.Range(0, attackClips.Length);
+        voiceSource.clip = attackClips[index];
+        voiceSource.Play();
+
+        Collider2D[] enemiesToDamage = Physics2D.OverlapCircleAll(attackPos.position, attackRange, whatIsEnemy);
+        if (enemiesToDamage.Length > 0)
+        {
+            StartCoroutine(cameraShake.Shake(.15f, .4f));
+        }
+        for (int i = 0; i < enemiesToDamage.Length; i++)
+        {
+            enemiesToDamage[i].GetComponent<enemyScript>().TakeDamage();
+
         }
     }
-
+    public void KnockBack()
+    {
+        if (knockFromRight == true)
+        {
+            rb.velocity = new Vector2(-knockback, knockback);
+        }
+        else
+        {
+            rb.velocity = new Vector2(knockback, knockback);
+        }
+        knockbackCount -= Time.deltaTime;
+    }
 }
