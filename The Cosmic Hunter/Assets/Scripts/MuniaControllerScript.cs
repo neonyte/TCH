@@ -137,11 +137,7 @@ public class MuniaControllerScript : MonoBehaviour {
                 else if (move < 0 && facingRight)
                     Flip();
             }
-            else
-            {
 
-                KnockBack();
-            }
         }
     }
     private void OnDrawGizmosSelected()
@@ -171,6 +167,7 @@ public class MuniaControllerScript : MonoBehaviour {
     }
     public void KnockBack()
     {
+        knockbackBool = true;
         if (knockFromRight == true)
         {
             rb.velocity = new Vector2(-knockback, knockback);
@@ -187,7 +184,7 @@ public class MuniaControllerScript : MonoBehaviour {
         StartCoroutine(KnockbackStun());
     }
     IEnumerator KnockbackStun() {
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(0.5f);
         knockbackBool = false;
     }
     public void Slash() {

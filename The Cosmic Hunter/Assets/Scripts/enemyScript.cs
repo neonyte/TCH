@@ -24,14 +24,14 @@ public class enemyScript : MonoBehaviour {
         {
             anim.SetTrigger("Attack");
             var player = col.gameObject.GetComponent<MuniaControllerScript>();
-            player.knockbackBool = true;
+
             if (player.transform.position.x < transform.position.x)
             {
                 player.knockFromRight = true;
             }
             else
                 player.knockFromRight = false;
-
+            player.KnockBack();
         }
     }
     public void TakeDamage()
