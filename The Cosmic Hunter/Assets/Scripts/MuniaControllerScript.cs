@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class MuniaControllerScript : MonoBehaviour {
     public float maxSpeed = 10f;
-    public Rigidbody2D rb;
+    Rigidbody2D rb;
     Animator anim;
     public SpriteRenderer psprite;
-    
+    bool attackCollider = false;
 
     public AudioClip[] attackClips = new AudioClip[0];
     public AudioClip[] jumpClips = new AudioClip[0];
@@ -32,10 +32,17 @@ public class MuniaControllerScript : MonoBehaviour {
     public GameObject attackEffect;
 
     public float knockback;
-    
     public bool knockFromRight;
-    public bool knockbackBool = false;
-    public int knockbackState = 0;
+    bool knockbackBool = false;
+
+    int leftTotal = 0;
+    float leftTimeDelay = 0;
+    int rightTotal = 0;
+    float rightTimeDelay = 0;
+    public float dashSpeed;
+    bool dashing;
+    public float dashCooldown;
+    float nextDash = 0;
 
     public static MuniaControllerScript instance;
 
@@ -48,11 +55,12 @@ public class MuniaControllerScript : MonoBehaviour {
     void Start () {
         rb = gameObject.GetComponent<Rigidbody2D>();
         anim = gameObject.GetComponent<Animator>();
-	}
+        psprite = gameObject.GetComponent<SpriteRenderer>();
+    }
 
 	void Update () {
 
-        psprite = gameObject.GetComponent<SpriteRenderer>();
+        
         isGrounded = Physics2D.OverlapCircle(feetPos.position, checkRadius, whatIsGround);
         if (isGrounded == true)
         {
@@ -128,27 +136,79 @@ public class MuniaControllerScript : MonoBehaviour {
         {
             if (knockbackBool == false)
             {
-                float move = Input.GetAxis("Horizontal");
-                anim.SetFloat("Speed", Mathf.Abs(move));
-                rb.velocity = new Vector2(move * maxSpeed, rb.velocity.y);
+                if (dashing == false) {
+                    float move = Input.GetAxis("Horizontal");
+                    anim.SetFloat("Speed", Mathf.Abs(move));
+                    rb.velocity = new Vector2(move * maxSpeed, rb.velocity.y);
 
-                if (move > 0 && !facingRight)
-                    Flip();
-                else if (move < 0 && facingRight)
-                    Flip();
+                    if (move > 0 && !facingRight)
+                        Flip();
+                    else if (move < 0 && facingRight)
+                        Flip();
+                }
+                if (Time.time > nextDash)
+                {
+                    if (Input.GetKeyDown(KeyCode.D)) { rightTotal += 1; }
+                    if (rightTotal == 1 && rightTimeDelay < .4) { rightTimeDelay += Time.deltaTime; }
+                    if (rightTotal == 1 && rightTimeDelay >= .4)
+                    {
+                        rightTimeDelay = 0;
+                        rightTotal = 0;
+                    }
+                    if (rightTotal == 2 && rightTimeDelay < .4)
+                    {
+                        anim.SetTrigger("dash");
+                        dashing = true;
+                        rb.velocity = new Vector2(dashSpeed, rb.velocity.y);
+                        rightTotal = 0;
+                        Physics2D.IgnoreLayerCollision(8, 10, true);
+                        jumpTimeCounter = 0;
+                        nextDash = Time.time + dashCooldown;
+                        StartCoroutine(DashStun());
+                    }
+                    if (Input.GetKeyDown(KeyCode.A)) { leftTotal += 1; }
+                    if (leftTotal == 1 && leftTimeDelay < .4) { leftTimeDelay += Time.deltaTime; }
+                    if (leftTotal == 1 && leftTimeDelay >= .4)
+                    {
+                        leftTimeDelay = 0;
+                        leftTotal = 0;
+                    }
+                    if (leftTotal == 2 && leftTimeDelay < .4)
+                    {
+                        anim.SetTrigger("dash");
+                        dashing = true;
+                        rb.velocity = new Vector2(-dashSpeed, rb.velocity.y);
+                        leftTotal = 0;
+                        Physics2D.IgnoreLayerCollision(8, 10, true);
+                        jumpTimeCounter = 0;
+                        nextDash = Time.time + dashCooldown;
+                        StartCoroutine(DashStun());
+                    }
+                }
             }
 
         }
+        if (attackCollider == true)
+        {
+            Collider2D[] enemiesToDamage = Physics2D.OverlapCircleAll(attackPos.position, attackRange, whatIsEnemy);
+            if (enemiesToDamage.Length > 0)
+            {
+                StartCoroutine(cameraShake.Shake(.15f, .4f));
+                for (int i = 0; i < enemiesToDamage.Length; i++)
+                {
+                    enemiesToDamage[i].GetComponent<enemyScript>().TakeDamage();
+
+                }
+                attackCollider = false;
+            }
+            
+        }
+        //end of update
     }
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(attackPos.position, attackRange);
-    }
-    void FixedUpdate()
-    {
-        
-        
     }
     void Flip() //direction facing
     {
@@ -163,11 +223,13 @@ public class MuniaControllerScript : MonoBehaviour {
         index = Random.Range(0, attackClips.Length);
         voiceSource.clip = attackClips[index];
         voiceSource.Play();
-        
+        rb.velocity = new Vector2(rb.velocity.x/2, rb.velocity.y);
+
     }
     public void KnockBack()
     {
         knockbackBool = true;
+        anim.SetTrigger("hurt");
         if (knockFromRight == true)
         {
             rb.velocity = new Vector2(-knockback, knockback);
@@ -184,27 +246,36 @@ public class MuniaControllerScript : MonoBehaviour {
         StartCoroutine(KnockbackStun());
     }
     IEnumerator KnockbackStun() {
+        Physics2D.IgnoreLayerCollision(8, 10, true);
         yield return new WaitForSeconds(0.5f);
         knockbackBool = false;
+        Physics2D.IgnoreLayerCollision(8, 10, false);
+        Debug.Log("knockback");
+    }
+    IEnumerator DashStun()
+    {
+        yield return new WaitForSeconds(0.2f);
+        rb.velocity = new Vector2(rb.velocity.x / 2, rb.velocity.y);
+        yield return new WaitForSeconds(0.1f);
+        dashing = false;
+        yield return new WaitForSeconds(0.3f);
+        Physics2D.IgnoreLayerCollision(8, 10, false);
+    }
+    void DashCD() {
+
     }
     public void Slash() {
         if (attackEffect.activeInHierarchy == true)
         {
             attackEffect.SetActive(false);
+            attackCollider = false;
         }
         else
         {
             attackEffect.SetActive(true);
-            Collider2D[] enemiesToDamage = Physics2D.OverlapCircleAll(attackPos.position, attackRange, whatIsEnemy);
-            if (enemiesToDamage.Length > 0)
-            {
-                StartCoroutine(cameraShake.Shake(.15f, .4f));
-            }
-            for (int i = 0; i < enemiesToDamage.Length; i++)
-            {
-                enemiesToDamage[i].GetComponent<enemyScript>().TakeDamage();
+            attackCollider = true;
+        }
 
-            }
-        }
-        }
+    }
+   
 }

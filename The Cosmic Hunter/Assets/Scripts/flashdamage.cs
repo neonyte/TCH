@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class flashdamage : MonoBehaviour
 {
-    bool touchingEnemy;
     SpriteRenderer spriteR;
     Color[] flashbetween = { Color.white, Color.red };
 
@@ -18,7 +17,6 @@ public class flashdamage : MonoBehaviour
 
         if (col.gameObject.tag == "enemy")
         {
-            touchingEnemy = true;
             StartCoroutine(onCoroutine());
 
         }

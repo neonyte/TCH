@@ -43,6 +43,9 @@ TagManager:
   - name: BG
     uniqueID: 1191251321
     locked: 0
+  - name: BGStuff
+    uniqueID: 2315922031
+    locked: 0
   - name: Platforms
     uniqueID: 2011389847
     locked: 0

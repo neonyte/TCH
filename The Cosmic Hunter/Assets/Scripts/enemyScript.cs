@@ -4,16 +4,17 @@ using UnityEngine;
 
 public class enemyScript : MonoBehaviour {
 
+    bool facingRight = false;
     Animator anim;
-    BoxCollider2D box;
-    CircleCollider2D circle;
+    //BoxCollider2D box;
+    PolygonCollider2D circle;
     public int health;
 
     private void Start()
     {
         anim = gameObject.GetComponent<Animator>();
-        box = gameObject.GetComponent<BoxCollider2D>();
-        circle = gameObject.GetComponent<CircleCollider2D>();
+        //box = gameObject.GetComponent<BoxCollider2D>();
+        circle = gameObject.GetComponent<PolygonCollider2D>();
     }
     void Update () {
 
@@ -22,15 +23,26 @@ public class enemyScript : MonoBehaviour {
     {
         if (col.gameObject.name == "Munia")
         {
+            
             anim.SetTrigger("Attack");
             var player = col.gameObject.GetComponent<MuniaControllerScript>();
 
             if (player.transform.position.x < transform.position.x)
             {
+                if (facingRight == true)
+                {
+                    Flip();
+                }
                 player.knockFromRight = true;
             }
             else
+            {
                 player.knockFromRight = false;
+                if (facingRight == false)
+                {
+                    Flip();
+                }
+            }
             player.KnockBack();
         }
     }
@@ -41,9 +53,16 @@ public class enemyScript : MonoBehaviour {
         if (health == 0)
         {
             anim.SetTrigger("Death");
-            box.enabled = false;
+            //box.enabled = false;
             circle.enabled = false;
             Destroy(gameObject, this.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length+0.5f);
         }
+    }
+    void Flip() //direction facing
+    {
+        facingRight = !facingRight;
+        Vector3 theScale = transform.localScale;
+        theScale.x *= -1;
+        transform.localScale = theScale;
     }
 }
