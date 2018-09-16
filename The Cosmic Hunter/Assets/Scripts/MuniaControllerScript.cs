@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MuniaControllerScript : MonoBehaviour {
     public float maxSpeed = 10f;
@@ -11,6 +12,7 @@ public class MuniaControllerScript : MonoBehaviour {
 
     public AudioClip[] attackClips = new AudioClip[0];
     public AudioClip[] jumpClips = new AudioClip[0];
+    public AudioClip[] hurtClips = new AudioClip[0];
     public AudioSource voiceSource;
     int index;
     public AudioSource lol;
@@ -44,9 +46,18 @@ public class MuniaControllerScript : MonoBehaviour {
     public float dashCooldown;
     float nextDash = 0;
 
-    public static MuniaControllerScript instance;
+    public float maxHealth = 3;
+    public float currHealth = 3;
+    public Text healthText;
+    public int shardsCollected = 0;
+    public GameObject party;
+    public Image ImageHealth;
+    
 
+    public static MuniaControllerScript instance;
     public GameObject ObjectPool;
+
+    
 
     private void Awake()
     {
@@ -60,7 +71,15 @@ public class MuniaControllerScript : MonoBehaviour {
 
 	void Update () {
 
-        
+        healthText.text = "Health = " + currHealth + "   Shards = " + shardsCollected;
+        if (currHealth == 0) {
+            lol.Play();
+            Instantiate(party, transform.position, Quaternion.identity);
+            currHealth = -1;
+            gameObject.SetActive(false);
+            
+        }
+
         isGrounded = Physics2D.OverlapCircle(feetPos.position, checkRadius, whatIsGround);
         if (isGrounded == true)
         {
@@ -197,11 +216,16 @@ public class MuniaControllerScript : MonoBehaviour {
                 for (int i = 0; i < enemiesToDamage.Length; i++)
                 {
                     enemiesToDamage[i].GetComponent<enemyScript>().TakeDamage();
-
+                    enemiesToDamage[i].GetComponent<flashDamageEnemy>().Damaged();
                 }
                 attackCollider = false;
             }
             
+        }
+        if (!anim.GetCurrentAnimatorStateInfo(0).IsName("Attack"))
+        {
+            attackEffect.SetActive(false);
+            attackCollider = false;
         }
         //end of update
     }
@@ -224,7 +248,15 @@ public class MuniaControllerScript : MonoBehaviour {
         voiceSource.clip = attackClips[index];
         voiceSource.Play();
         rb.velocity = new Vector2(rb.velocity.x/2, rb.velocity.y);
-
+    }
+    public void Hurt()
+    {
+        index = Random.Range(0,hurtClips.Length);
+        voiceSource.clip = hurtClips[index];
+        voiceSource.Play();
+        float ratio = currHealth / maxHealth;
+        ImageHealth.rectTransform.localScale = new Vector3(ratio, 1, 1);
+        Debug.Log(ratio);
     }
     public void KnockBack()
     {
@@ -261,9 +293,6 @@ public class MuniaControllerScript : MonoBehaviour {
         yield return new WaitForSeconds(0.3f);
         Physics2D.IgnoreLayerCollision(8, 10, false);
     }
-    void DashCD() {
-
-    }
     public void Slash() {
         if (attackEffect.activeInHierarchy == true)
         {
@@ -277,5 +306,4 @@ public class MuniaControllerScript : MonoBehaviour {
         }
 
     }
-   
 }

@@ -5,11 +5,16 @@ using UnityEngine;
 public class flashdamage : MonoBehaviour
 {
     SpriteRenderer spriteR;
-    Color[] flashbetween = { Color.white, Color.red };
+    Color notsoRed = new Color(1,0.5f,0.5f,1);
+    Color[] flashbetween = { Color.white,Color.white };
+    
 
     void Start()
     {
         spriteR = GetComponent<SpriteRenderer>();
+        flashbetween[0] = Color.white;
+        flashbetween[1] = notsoRed;
+
     }
 
     void OnCollisionEnter2D(Collision2D col)
@@ -17,6 +22,9 @@ public class flashdamage : MonoBehaviour
 
         if (col.gameObject.tag == "enemy")
         {
+            MuniaControllerScript.instance.currHealth -= 1;
+            MuniaControllerScript.instance.Hurt();
+            
             StartCoroutine(onCoroutine());
 
         }
@@ -35,6 +43,7 @@ public class flashdamage : MonoBehaviour
             yield return new WaitForSeconds(0.07f);
         }
         spriteR.color = Color.white;
+     
         
     }
 }
