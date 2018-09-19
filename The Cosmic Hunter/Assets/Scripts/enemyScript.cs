@@ -6,54 +6,72 @@ public class enemyScript : MonoBehaviour {
 
     bool facingRight = false;
     Animator anim;
-    //BoxCollider2D box;
+    AudioSource esfx;
     PolygonCollider2D circle;
     public int health;
-
+    GameObject munia;
+    MuniaControllerScript muniaScript;
     private void Start()
     {
         anim = gameObject.GetComponent<Animator>();
-        //box = gameObject.GetComponent<BoxCollider2D>();
+        esfx = gameObject.GetComponent<AudioSource>();
         circle = gameObject.GetComponent<PolygonCollider2D>();
-    }
-    void Update () {
-
+        munia = GameObject.FindGameObjectWithTag("Player");
+        muniaScript = munia.GetComponent<MuniaControllerScript>();
     }
     private void OnCollisionEnter2D(Collision2D col)
     {
-        if (col.gameObject.name == "Munia")
+        if (col.gameObject == munia)
         {
             
             anim.SetTrigger("Attack");
-            var player = col.gameObject.GetComponent<MuniaControllerScript>();
+            
 
-            if (player.transform.position.x < transform.position.x)
+            if (munia.transform.position.x < transform.position.x)
             {
                 if (facingRight == true)
                 {
                     Flip();
                 }
-                player.knockFromRight = true;
+                muniaScript.knockFromRight = true;
             }
             else
             {
-                player.knockFromRight = false;
+                muniaScript.knockFromRight = false;
                 if (facingRight == false)
                 {
                     Flip();
                 }
             }
-            player.KnockBack();
+            muniaScript.KnockBack();
+            esfx.clip = Resources.Load<AudioClip>("SoundMusic/punch1");
+            esfx.Play();
         }
     }
     public void TakeDamage()
     {
-        Debug.Log("Damage taken");
+        esfx.clip = Resources.Load<AudioClip>("SoundMusic/stab3");
+        esfx.Play();
+        if (munia.transform.position.x < transform.position.x)
+        {
+            if (facingRight == true)
+            {
+                Flip();
+            }
+            muniaScript.knockFromRight = true;
+        }
+        else
+        {
+            muniaScript.knockFromRight = false;
+            if (facingRight == false)
+            {
+                Flip();
+            }
+        }
         health -= 1;
         if (health == 0)
         {
             anim.SetTrigger("Death");
-            //box.enabled = false;
             circle.enabled = false;
             Destroy(gameObject, this.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length+0.5f);
         }

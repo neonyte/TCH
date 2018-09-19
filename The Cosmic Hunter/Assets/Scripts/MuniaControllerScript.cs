@@ -16,6 +16,7 @@ public class MuniaControllerScript : MonoBehaviour {
     public AudioSource voiceSource;
     int index;
     public AudioSource lol;
+    public AudioSource sfx;
 
     bool facingRight = true;
     bool isGrounded;
@@ -46,37 +47,57 @@ public class MuniaControllerScript : MonoBehaviour {
     public float dashCooldown;
     float nextDash = 0;
 
-    public float maxHealth = 3;
-    public float currHealth = 3;
+    public float maxHealth = 6;
+    public float currHealth = 6;
     public Text healthText;
     public int shardsCollected = 0;
+    public Image[] shards = new Image[3];
     public GameObject party;
     public Image ImageHealth;
-    
+    float ratio;
+    public float lerpSpeed = 4;
 
     public static MuniaControllerScript instance;
     public GameObject ObjectPool;
-
     
 
     private void Awake()
     {
         instance = this;
+        Physics2D.IgnoreLayerCollision(8, 10, false);
+        Physics2D.IgnoreLayerCollision(8, 14, false);
     }
     void Start () {
         rb = gameObject.GetComponent<Rigidbody2D>();
         anim = gameObject.GetComponent<Animator>();
         psprite = gameObject.GetComponent<SpriteRenderer>();
+        for (int i = 0; i<shards.Length; i++)
+        {
+            shards[i].enabled = false;
+        }
     }
+    IEnumerator Desu()
+    {
+        yield return new WaitForSeconds(0.2f);
+        Instantiate(party, transform.position, Quaternion.identity);
+        gameObject.SetActive(false);
 
+    }
 	void Update () {
-
-        healthText.text = "Health = " + currHealth + "   Shards = " + shardsCollected;
-        if (currHealth == 0) {
+        ratio = currHealth / maxHealth;
+        if (currHealth >= 0)
+        {
+            if (ImageHealth.fillAmount != ratio)
+            {
+                ImageHealth.fillAmount = Mathf.Lerp(ImageHealth.fillAmount, ratio, Time.deltaTime*lerpSpeed);
+                ImageHealth.color = Color.Lerp(Color.red, Color.green, ratio);
+            }
+        }
+        healthText.text = currHealth+" "+maxHealth+"ratio = "+ratio+" "+ImageHealth.fillAmount;
+        if (currHealth <= 0) {
             lol.Play();
-            Instantiate(party, transform.position, Quaternion.identity);
-            currHealth = -1;
-            gameObject.SetActive(false);
+            currHealth = 0;
+            StartCoroutine(Desu());
             
         }
 
@@ -92,6 +113,8 @@ public class MuniaControllerScript : MonoBehaviour {
             index = Random.Range(0, jumpClips.Length);
             voiceSource.clip = jumpClips[index];
             voiceSource.Play();
+            sfx.clip = Resources.Load<AudioClip>("SoundMusic/jumps");
+            sfx.Play();
         }
         if (!anim.GetCurrentAnimatorStateInfo(0).IsName("Attack")) //not working if attacking
         {
@@ -116,18 +139,15 @@ public class MuniaControllerScript : MonoBehaviour {
                 if (ultActive == false)
                 {
                     ultActive = true;
-                    
-                    //lol.Play();
                 }
                 else
                 {
                     ultActive = false;
-                    //lol.Pause();
                 }
             }
             if (Input.GetKeyDown(KeyCode.N)) //attack
             {
-                AttackAndDamage();
+                Attack();
             }
         }
         if (rb.velocity.y != 0) // jumping and falling animations
@@ -227,6 +247,7 @@ public class MuniaControllerScript : MonoBehaviour {
             attackEffect.SetActive(false);
             attackCollider = false;
         }
+        
         //end of update
     }
     private void OnDrawGizmosSelected()
@@ -241,22 +262,25 @@ public class MuniaControllerScript : MonoBehaviour {
         theScale.x *= -1;
         transform.localScale = theScale;
     }
-    void AttackAndDamage() {
+    void Attack() {
         anim.SetTrigger("attack");
         jumpTimeCounter = 0;
         index = Random.Range(0, attackClips.Length);
         voiceSource.clip = attackClips[index];
         voiceSource.Play();
+        sfx.clip = Resources.Load<AudioClip>("SoundMusic/whoosh3");
+        sfx.Play();
         rb.velocity = new Vector2(rb.velocity.x/2, rb.velocity.y);
     }
     public void Hurt()
     {
+
+        currHealth -= 1;
+        ratio = currHealth / maxHealth;
         index = Random.Range(0,hurtClips.Length);
         voiceSource.clip = hurtClips[index];
         voiceSource.Play();
-        float ratio = currHealth / maxHealth;
-        ImageHealth.rectTransform.localScale = new Vector3(ratio, 1, 1);
-        Debug.Log(ratio);
+        
     }
     public void KnockBack()
     {
@@ -265,24 +289,21 @@ public class MuniaControllerScript : MonoBehaviour {
         if (knockFromRight == true)
         {
             rb.velocity = new Vector2(-knockback, knockback);
-            //rb.AddForce(-transform.right*knockback);
-            //rb.AddForce(transform.up * knockback);
         }
         else
         {
             rb.velocity = new Vector2(knockback, knockback);
-            //rb.AddForce(transform.right * knockback);
-            //rb.AddForce(transform.up * knockback);
         }
         
         StartCoroutine(KnockbackStun());
     }
     IEnumerator KnockbackStun() {
         Physics2D.IgnoreLayerCollision(8, 10, true);
+        Physics2D.IgnoreLayerCollision(8, 14, true);
         yield return new WaitForSeconds(0.5f);
         knockbackBool = false;
         Physics2D.IgnoreLayerCollision(8, 10, false);
-        Debug.Log("knockback");
+        Physics2D.IgnoreLayerCollision(8, 14, false);
     }
     IEnumerator DashStun()
     {
@@ -304,6 +325,13 @@ public class MuniaControllerScript : MonoBehaviour {
             attackEffect.SetActive(true);
             attackCollider = true;
         }
-
+    }
+    public void ShardCtr() {
+        if (shardsCollected < 3)
+        {
+            shards[shardsCollected].enabled = true;
+            shardsCollected += 1;
+            
+        }
     }
 }

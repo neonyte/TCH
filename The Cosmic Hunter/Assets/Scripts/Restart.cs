@@ -14,6 +14,11 @@ public class Restart : MonoBehaviour {
     }
     public void RestartLevel()
     {
+        StartCoroutine(DelayRestart());
+    }
+    IEnumerator DelayRestart()
+    {
+        yield return new WaitForSeconds(2f);
         SceneManager.LoadScene(1);
     }
 }

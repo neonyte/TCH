@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class shardCollect : MonoBehaviour {
+    public AudioSource sfx;
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.name == "Munia")
         {
-            MuniaControllerScript.instance.shardsCollected += 1;
+            sfx.Play();
+            MuniaControllerScript.instance.ShardCtr();
             Destroy(gameObject);
         }
     }

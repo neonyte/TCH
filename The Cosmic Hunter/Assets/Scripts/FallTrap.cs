@@ -4,15 +4,35 @@ using UnityEngine;
 
 public class FallTrap : MonoBehaviour {
     Rigidbody2D rb;
+    Collider2D cd;
+    Collider2D mun;
 	// Use this for initialization
 	void Start () {
         rb = GetComponent<Rigidbody2D>();
+        cd = GetComponent<Collider2D>();
 	}
-    private void OnTriggerEnter2D(Collider2D col)
-    {
-        if (col.gameObject.name.Equals("Munia"))
-        {
+    public void Triggered(Collider2D col)
+    { 
+            mun = col;
             rb.isKinematic = false;
+            
+            StartCoroutine(Disappear());
+    }
+    private void OnCollisionEnter2D(Collision2D coll)
+    {
+        if (coll.gameObject.name.Equals("Munia"))
+        {
+            var player = coll.gameObject.GetComponent<MuniaControllerScript>();
+            if (player.transform.position.x < transform.position.x)
+            {
+                player.knockFromRight = true;
+            }
+            else
+            {
+                player.knockFromRight = false;
+            }
+            player.KnockBack();
+            Physics2D.IgnoreCollision(cd, mun, true);
             StartCoroutine(Disappear());
         }
     }
