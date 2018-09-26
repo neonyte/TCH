@@ -21,9 +21,9 @@ public class flashDamageEnemy : MonoBehaviour {
     public void Damaged()
     {
 
-        StartCoroutine(onCoroutine());
+        StartCoroutine(Flashing());
     }
-    IEnumerator onCoroutine()
+    IEnumerator Flashing()
     {
         float elapsedTime = 0f;
         int index = 0;
