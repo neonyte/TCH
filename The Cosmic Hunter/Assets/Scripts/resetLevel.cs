@@ -4,11 +4,12 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class resetLevel : MonoBehaviour {
+    public GameObject GameOver;
     private void OnTriggerEnter2D(Collider2D col)
     {
         if (col.gameObject.name == "Munia")
         {
-            SceneManager.LoadScene(1);
+            GameOver.SetActive(true);
         }
     }
     

@@ -18,7 +18,11 @@ public class Restart : MonoBehaviour {
     }
     IEnumerator DelayRestart()
     {
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(0.5f);
+        SceneManager.LoadScene(2);
+    }
+    public void BacktoMainMenu()
+    {
         SceneManager.LoadScene(1);
     }
 }

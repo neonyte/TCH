@@ -57,9 +57,15 @@ TagManager:
   - name: Effects
     uniqueID: 2899850237
     locked: 0
+  - name: Trap
+    uniqueID: 2620967019
+    locked: 0
   - name: Player
     uniqueID: 3410444317
     locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: UI
+    uniqueID: 1342287227
     locked: 0

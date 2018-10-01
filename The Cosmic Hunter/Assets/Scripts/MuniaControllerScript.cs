@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityStandardAssets.CrossPlatformInput;
 
 public class MuniaControllerScript : MonoBehaviour {
+    public GameObject GameOverScreen;
     public float maxSpeed = 10f;
     Rigidbody2D rb;
     Animator anim;
@@ -31,9 +33,13 @@ public class MuniaControllerScript : MonoBehaviour {
     public float jumpTime;
     public Transform attackPos;
     public float attackRange;
+    public Transform corner1;
+    public Transform corner2;
+
     public LayerMask whatIsEnemy;
     public CameraShake cameraShake;
     public GameObject attack1Effect;
+    public GameObject attack2Effect;
     public GameObject attack3Effect;
     bool isBlocking = false;
     public GameObject forcefield;
@@ -116,6 +122,7 @@ public class MuniaControllerScript : MonoBehaviour {
     }
     IEnumerator Desu()
     {
+        GameOverScreen.SetActive(true);
         yield return new WaitForSeconds(0.2f);
         Instantiate(party, transform.position, Quaternion.identity);
         gameObject.SetActive(false);
@@ -133,7 +140,10 @@ public class MuniaControllerScript : MonoBehaviour {
         if (isBlocking == true && currMana > 0)
         currMana -= 1;
     }
+
 	void Update () {
+
+
         if (currMana > 100) currMana = 100;
         if (currHealth > maxHealth) currHealth = maxHealth;
         if (anim.GetCurrentAnimatorStateInfo(0).IsName("Attack") || anim.GetCurrentAnimatorStateInfo(0).IsName("Attack 2") || anim.GetCurrentAnimatorStateInfo(0).IsName("Attack 3"))
@@ -172,7 +182,7 @@ public class MuniaControllerScript : MonoBehaviour {
         {
             if (isBlocking == false)
             {
-                if (isGrounded == true && Input.GetKeyDown(KeyCode.Space))
+                if (isGrounded == true && CrossPlatformInputManager.GetButtonDown("Jump"))
                 { // jump
                     isJumping = true;
                     jumpTimeCounter = jumpTime;
@@ -185,7 +195,7 @@ public class MuniaControllerScript : MonoBehaviour {
                 }
             }
 
-                if (Input.GetKey(KeyCode.Space) && isJumping == true) // jump higher
+                if (CrossPlatformInputManager.GetButton("Jump") && isJumping == true) // jump higher
                 {
                     if (jumpTimeCounter > 0)
                     {
@@ -198,11 +208,11 @@ public class MuniaControllerScript : MonoBehaviour {
                         isJumping = false;
                     }
                 }
-                if (Input.GetKeyUp(KeyCode.Space))
+                if (CrossPlatformInputManager.GetButtonUp("Jump"))
                 {
                     isJumping = false;
                 }
-                if (Input.GetKeyDown(KeyCode.U)) //ult
+                if (CrossPlatformInputManager.GetButtonUp("Ult")) //ult
                 {
                     if (ultActive == false)
                     {
@@ -224,7 +234,7 @@ public class MuniaControllerScript : MonoBehaviour {
             reAttackTimer = 0;
         }
         if (isAttacking == false && attackState == 3) attackState = 0;
-        if (Input.GetKeyDown(KeyCode.N))                                // ATTACK
+        if (CrossPlatformInputManager.GetButtonDown("Attack"))                                // ATTACK
         {
             if (reAttackTimer == 0 && isAttacking ==false && Time.time > nextAttack)
             {
@@ -239,7 +249,6 @@ public class MuniaControllerScript : MonoBehaviour {
             }
                 if (comboTimer > 0 && comboTimer <= comboWindow && attackState == 1)
                 {
-                Debug.Log(comboTimer);
                 SlashDisappear();
                     attackState = 2;
                     comboTimer = 0;
@@ -253,12 +262,13 @@ public class MuniaControllerScript : MonoBehaviour {
             }
         }
        
-        if (Input.GetKeyDown(KeyCode.J))
+        if (CrossPlatformInputManager.GetButtonDown("Special"))
         {
 
             if (comboTimer > 0 && comboTimer <= comboWindow && attackState == 2 && CanSpendMana(smashCost) == true)
             {
                     SlashDisappear();
+                    PushDisappear();
                     attackState = 3;
                     setComboTimer = false;
                     comboTimer = 0;
@@ -317,7 +327,7 @@ public class MuniaControllerScript : MonoBehaviour {
                 {
                     if (dashing == false)
                     {
-                        float move = Input.GetAxis("Horizontal");
+                        float move = CrossPlatformInputManager.GetAxis("Horizontal");
                         anim.SetFloat("Speed", Mathf.Abs(move));
 
                         rb.velocity = new Vector2(move * maxSpeed, rb.velocity.y);
@@ -329,7 +339,7 @@ public class MuniaControllerScript : MonoBehaviour {
                     }
                     if (Time.time > nextDash && CanSpendMana(dashCost) == true)
                     {
-                        if (Input.GetKeyDown(KeyCode.D)) { rightTotal += 1; }
+                        if (CrossPlatformInputManager.GetButtonDown("Right")) { rightTotal += 1; }
                         if (rightTotal == 1 && rightTimeDelay < dashWindow) { rightTimeDelay += Time.deltaTime; }
                         if (rightTotal == 1 && rightTimeDelay >= dashWindow)
                         {
@@ -348,7 +358,7 @@ public class MuniaControllerScript : MonoBehaviour {
                             StopCoroutine(DashStun());
                             StartCoroutine(DashStun());
                         }
-                        if (Input.GetKeyDown(KeyCode.A)) { leftTotal += 1; }
+                        if (CrossPlatformInputManager.GetButtonDown("Left")) { leftTotal += 1; }
                         if (leftTotal == 1 && leftTimeDelay < dashWindow) { leftTimeDelay += Time.deltaTime; }
                         if (leftTotal == 1 && leftTimeDelay >= dashWindow)
                         {
@@ -373,26 +383,18 @@ public class MuniaControllerScript : MonoBehaviour {
         }
         if (attackCollider == true)
         {
-            Collider2D[] enemiesToDamage = Physics2D.OverlapCircleAll(attackPos.position, attackRange, whatIsEnemy);
-            if (enemiesToDamage.Length > 0)
-            {
-                
-                for (int i = 0; i < enemiesToDamage.Length; i++)
-                {
-                    enemiesToDamage[i].GetComponent<enemyScript>().TakeDamage();
-                }
-                attackCollider = false;
-            }
+            AttackColliding();
+            
             
         }
         if (isAttacking == false)
         {
-            attack1Effect.SetActive(false);
-            attackCollider = false;
+            SlashDisappear();
+            PushDisappear();
         }
         if (Time.time > nextBlock && CanSpendMana(5) == true)
         {
-            if (Input.GetKey(KeyCode.B))
+            if (CrossPlatformInputManager.GetButton("Block"))
             {
                 isBlocking = true;
                 jumpTimeCounter = 0;
@@ -400,7 +402,7 @@ public class MuniaControllerScript : MonoBehaviour {
                 didBlock = true;
             }
         }
-        if (Input.GetKeyUp(KeyCode.B) || currMana <5)
+        if (CrossPlatformInputManager.GetButtonUp("Block") || currMana <5)
         {
             isBlocking = false;
             anim.SetBool("isBlocking", false);
@@ -496,7 +498,16 @@ public class MuniaControllerScript : MonoBehaviour {
     {
         attack1Effect.SetActive(false);
         attackCollider = false;
-        
+    }
+    public void PushAppear()
+    {
+        attack2Effect.SetActive(true);
+        attackCollider = true;
+    }
+    public void PushDisappear()
+    {
+        attack2Effect.SetActive(false);
+        attackCollider = false;
     }
     public void SmashAppear() {
         attack3Effect.SetActive(true);
@@ -568,6 +579,21 @@ public class MuniaControllerScript : MonoBehaviour {
         }
         
         StartCoroutine(KnockbackStun());
+    }
+    void AttackColliding()
+    {
+        Collider2D[] enemiesToDamage = null;
+        if (attackState == 1) enemiesToDamage = Physics2D.OverlapCircleAll(attackPos.position, attackRange, whatIsEnemy);
+        if (attackState == 2) enemiesToDamage = Physics2D.OverlapAreaAll(corner1.position, corner2.position, whatIsEnemy);
+        if (enemiesToDamage.Length > 0)
+        {
+
+            for (int i = 0; i < enemiesToDamage.Length; i++)
+            {
+                enemiesToDamage[i].GetComponent<enemyScript>().TakeDamage();
+            }
+            attackCollider = false;
+        }
     }
     IEnumerator KnockbackStun() {
         Physics2D.IgnoreLayerCollision(8, 10, true);

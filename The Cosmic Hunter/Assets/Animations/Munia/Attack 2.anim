@@ -84,8 +84,8 @@ AnimationClip:
   m_HasMotionFloatCurves: 0
   m_GenerateMotionCurves: 0
   m_Events:
-  - time: 0.125
-    functionName: SlashAppear
+  - time: 0.25
+    functionName: PushAppear
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
@@ -99,7 +99,7 @@ AnimationClip:
     intParameter: 0
     messageOptions: 0
   - time: 0.625
-    functionName: SlashDisappear
+    functionName: PushDisappear
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
