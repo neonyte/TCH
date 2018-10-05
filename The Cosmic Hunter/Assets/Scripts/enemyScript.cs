@@ -4,27 +4,32 @@ using UnityEngine;
 
 public class enemyScript : MonoBehaviour {
 
-    bool facingRight = false;
-    Animator anim;
+    public bool facingRight = false;
     AudioSource esfx;
     Collider2D circle;
     public int health;
     public GameObject munia;
     MuniaControllerScript muniaScript;
-    public static enemyScript instance;
+    public bool toAttack = false;
+
     public bool triggerColliding = false;
     public float moveSpeed = 2f;
-    public bool willMove = true;
-    Rigidbody2D rb;
+    public bool canMove = true;
+    public bool willMove = false;
+
+    public Rigidbody2D rb;
     SpriteRenderer spriteR;
     Shader shaderGUItext;
     Shader shaderSpritesDefault;
     Shader[] shaders = { null, null };
+    public bool canBeSmashed = true;
+    bool isDying = false;
+    public bool dieTrigger = false;
+
+
 
     private void Start()
     {
-        instance = this;
-        anim = gameObject.GetComponent<Animator>();
         esfx = gameObject.GetComponent<AudioSource>();
         circle = gameObject.GetComponent<Collider2D>();
         rb = gameObject.GetComponent<Rigidbody2D>();
@@ -39,30 +44,35 @@ public class enemyScript : MonoBehaviour {
     }
     private void Update()
     {
-
-        if (rb.velocity.magnitude > 0)
+        
+        if (canMove == true && munia.activeInHierarchy == true)
         {
-            anim.SetBool("Walking", true);
-        }
-        else
-            anim.SetBool("Walking", false);
+            if (triggerColliding == true && health > 0)
+            {
+                TriggerFlip();
 
-        if (triggerColliding == true && health > 0)
-        {
-
-            TriggerFlip();
+                willMove = true;
+            }
         }
+            if (triggerColliding == false && health > 0)
+            {
+                willMove = false;
+                rb.velocity = new Vector2(0, 0);
+            }
+        
     }
-    private void OnCollisionEnter2D(Collision2D col)
+        private void OnCollisionEnter2D(Collision2D col)
     {
         if (col.gameObject == munia)
         {
+            toAttack = true;
             
-            anim.SetTrigger("Attack");
-            muniaScript.KnockBack();
-            esfx.clip = Resources.Load<AudioClip>("SoundMusic/punch1");
-            esfx.Play();
-            
+                if (muniaScript.attackState != 3)
+            {
+
+                esfx.clip = Resources.Load<AudioClip>("SoundMusic/punch1");
+                esfx.Play();
+            }
             StartCoroutine(MoveDelay(1.5f));
         }
         if (col.gameObject.name.Equals("forcefield"))
@@ -70,34 +80,38 @@ public class enemyScript : MonoBehaviour {
             StartCoroutine(MoveDelay(1f));
             StartCoroutine(Knockback(0,8f));
         }
+        
     }
-    IEnumerator MoveDelay(float seconds)
+    
+    public IEnumerator MoveDelay(float seconds)
     {
-        willMove = false;
+        canMove = false;
         yield return new WaitForSeconds(seconds);
-        willMove = true;
+        canMove = true;
     }
-    public void TakeDamage()
+    public void TakeDamage(int h, float k)
     {
         if (health > 0)
         {
             esfx.clip = Resources.Load<AudioClip>("SoundMusic/staby");
             esfx.Play();
             StartCoroutine(muniaScript.cameraShake.Shake(.15f, .4f));
+            health -= h;
         }
-        health -= 1;
+        
         if (health > 0)
         {
             StartCoroutine(MoveDelay(0.5f));
             StartCoroutine(Flashing());
-            StartCoroutine(Knockback(0.2f,3f));
+            StopCoroutine(Knockback(0.2f,k));
+            StartCoroutine(Knockback(0.2f,k));
         }
-
-        if (health == 0)
+        if (health <= 0 && isDying == false)
         {
-            anim.SetTrigger("Death");
+            isDying = true;
+            dieTrigger = true;
             StartCoroutine(muniaScript.cameraShake.Shake(.15f, .4f));
-            willMove = false;
+            canMove = false;
             StopAllCoroutines();
             spriteR.material.shader = shaderSpritesDefault;
             Physics2D.IgnoreCollision(circle, munia.GetComponent<Collider2D>(), true);
@@ -107,9 +121,10 @@ public class enemyScript : MonoBehaviour {
     }
     public void TriggerFlip()
     {
-        if (munia.transform.position.x < transform.position.x)
+        
+            if (munia.transform.position.x < transform.position.x)
         {
-            muniaScript.knockFromRight = true;
+            
             if (facingRight == true)
             {
                 Flip();
@@ -118,19 +133,14 @@ public class enemyScript : MonoBehaviour {
         }
         else
         {
-            muniaScript.knockFromRight = false;
+            
             if (facingRight == false)
             {
                 Flip();
             }
         }
         
-        if (willMove == true && munia.activeInHierarchy == true) {
-            if (facingRight)
-            rb.velocity = new Vector2(moveSpeed, 0);
-            else
-            rb.velocity = new Vector2(-moveSpeed, 0);
-        }
+        
     }
     void Flip() //direction facing
     {
@@ -161,5 +171,16 @@ public class enemyScript : MonoBehaviour {
             rb.velocity = new Vector2(-distance, 0);
         else
             rb.velocity = new Vector2(distance, 0);
+    }
+    public void Smashing()
+    {
+        StartCoroutine(BigSlashed());
+    }
+    IEnumerator BigSlashed()
+    {
+        canBeSmashed = false;
+        yield return new WaitForSeconds(1f);
+        canBeSmashed = true;
+
     }
 }

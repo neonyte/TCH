@@ -10,18 +10,19 @@ public class MuniaControllerScript : MonoBehaviour {
     Rigidbody2D rb;
     Animator anim;
     public SpriteRenderer psprite;
-    bool attackCollider = false;
+
 
     public AudioClip[] attackClips = new AudioClip[0];
     public AudioClip[] jumpClips = new AudioClip[0];
     public AudioClip[] hurtClips = new AudioClip[0];
     public AudioSource voiceSource;
+    public AudioSource voiceSwish;
     int index;
     public AudioSource lol;
     public AudioSource sfx;
     AudioEchoFilter echoes;
 
-    bool facingRight = true;
+    public bool facingRight = true;
     bool isGrounded;
     bool ultActive = false;
     public Transform feetPos;
@@ -43,6 +44,7 @@ public class MuniaControllerScript : MonoBehaviour {
     public GameObject attack3Effect;
     bool isBlocking = false;
     public GameObject forcefield;
+    public GameObject bigSlash;
 
     public float knockback;
     public bool knockFromRight;
@@ -61,19 +63,25 @@ public class MuniaControllerScript : MonoBehaviour {
     float blockCooldown = 2;
     float nextBlock = 0;
     bool didBlock = false;
-
+    float nextSwish = 0;
+    float swishCooldown = 2;
+    public Image blockFill;
+    float blockFillTimeStamp;
+    public Image swishFill;
+    float swishFillTimeStamp;
 
     public float maxHealth = 6;
     public float currHealth = 6;
     public float maxMana = 100;
     public float currMana = 0;
-    public float blockManaRate = 0.5f;
+    public float blockManaRate = 0.3f;
     public float ManaRegenRate = 0.1f;
     public float dashCost = 15;
     public float smashCost = 25;
+    public float swishCost = 25;
     public bool isAttacking;
 
-    int attackState = 0;
+    public int attackState = 0;
     float comboTimer = 0;
     bool setComboTimer = false;
     public float comboWindow = 0.4f;
@@ -117,8 +125,8 @@ public class MuniaControllerScript : MonoBehaviour {
         {
             shards[i].enabled = false;
         }
-        InvokeRepeating("RegenMana", 0, blockManaRate);
-        InvokeRepeating("BlockingMana", 0, ManaRegenRate);
+        InvokeRepeating("RegenMana", 0, ManaRegenRate);
+        InvokeRepeating("BlockingMana", 0, blockManaRate);
     }
     IEnumerator Desu()
     {
@@ -142,7 +150,7 @@ public class MuniaControllerScript : MonoBehaviour {
     }
 
 	void Update () {
-
+        if (Input.GetKeyDown(KeyCode.Q)) { currMana += 10; }
 
         if (currMana > 100) currMana = 100;
         if (currHealth > maxHealth) currHealth = maxHealth;
@@ -171,7 +179,7 @@ public class MuniaControllerScript : MonoBehaviour {
             StartCoroutine(Desu());
             
         }
-        whatever.text = " // " + attackState + " // " +comboTimer+ " //  "+reAttackTimer+" // ";
+        
         ImageMana.fillAmount = currMana/maxMana;
         isGrounded = Physics2D.OverlapCircle(feetPos.position, checkRadius, whatIsGround);
         if (isGrounded == true)
@@ -212,7 +220,7 @@ public class MuniaControllerScript : MonoBehaviour {
                 {
                     isJumping = false;
                 }
-                if (CrossPlatformInputManager.GetButtonUp("Ult")) //ult
+                if (CrossPlatformInputManager.GetButtonDown("Ult")) //ult
                 {
                     if (ultActive == false)
                     {
@@ -223,8 +231,19 @@ public class MuniaControllerScript : MonoBehaviour {
                         ultActive = false;
                     }
                 }
-                
-            
+            if (!anim.GetCurrentAnimatorStateInfo(0).IsName("Swish"))               //SWISH
+            {
+                voiceSwish.Stop();
+                if (CrossPlatformInputManager.GetButtonDown("Swish") && CanSpendMana(swishCost) == true && Time.time > nextSwish) 
+                {
+
+                    jumpTimeCounter = 0;
+                    rb.velocity = new Vector2(rb.velocity.x, 0);
+                    voiceSwish.Play();
+                    anim.SetTrigger("swish");
+                    
+                }
+            }
         }
         if (setAttackTimer == true) reAttackTimer += Time.deltaTime;            //ATTACK
         if (reAttackTimer >= reAttackWindow)
@@ -286,7 +305,7 @@ public class MuniaControllerScript : MonoBehaviour {
         {
             setComboTimer = false;
             comboTimer = 0;
-            attackState = 0;
+            if(attackState!=3) attackState = 0;
             setAttackTimer = false;
             reAttackTimer = 0;
             anim.SetBool("attackQueue", false);
@@ -381,18 +400,13 @@ public class MuniaControllerScript : MonoBehaviour {
                 }
             }
         }
-        if (attackCollider == true)
-        {
-            AttackColliding();
-            
-            
-        }
+        
         if (isAttacking == false)
         {
             SlashDisappear();
             PushDisappear();
         }
-        if (Time.time > nextBlock && CanSpendMana(5) == true)
+        if (Time.time > nextBlock && CanSpendMana(5) == true)                       //BLOCK
         {
             if (CrossPlatformInputManager.GetButton("Block"))
             {
@@ -402,6 +416,7 @@ public class MuniaControllerScript : MonoBehaviour {
                 didBlock = true;
             }
         }
+
         if (CrossPlatformInputManager.GetButtonUp("Block") || currMana <5)
         {
             isBlocking = false;
@@ -409,8 +424,10 @@ public class MuniaControllerScript : MonoBehaviour {
             if (didBlock == true)
             {
                 nextBlock = Time.time + blockCooldown;
+                blockFillTimeStamp = Time.time;
             }
             didBlock = false;
+
         }
         if (isBlocking == true)
         {
@@ -422,9 +439,14 @@ public class MuniaControllerScript : MonoBehaviour {
         {
             forcefield.SetActive(false);
         }
-
-       
         
+        if (Time.time > nextBlock) blockFill.fillAmount = 0;
+        else blockFill.fillAmount = (nextBlock - Time.time) / (nextBlock-blockFillTimeStamp);
+
+        if (Time.time > nextSwish) swishFill.fillAmount = 0;
+        else swishFill.fillAmount = (nextSwish - Time.time) / (nextSwish - swishFillTimeStamp);
+
+        whatever.text = " // " + blockFillTimeStamp + " // " + nextBlock + " //  " + blockFill.fillAmount + " // "+Time.time;
 
         //END OF UPDATE
         //END OF UPDATE
@@ -490,51 +512,54 @@ public class MuniaControllerScript : MonoBehaviour {
     public void SlashAppear()
     {
         attack1Effect.SetActive(true);
-        attackCollider = true;
+
         comboTimer = 0;
         setComboTimer = false;
     }
     public void SlashDisappear()
     {
         attack1Effect.SetActive(false);
-        attackCollider = false;
+
     }
     public void PushAppear()
     {
         attack2Effect.SetActive(true);
-        attackCollider = true;
+
     }
     public void PushDisappear()
     {
         attack2Effect.SetActive(false);
-        attackCollider = false;
+
     }
     public void SmashAppear() {
+        attackState = 3;
         attack3Effect.SetActive(true);
-        attackCollider = true;
+        attack3Effect.GetComponent<AudioSource>().Play();
         comboTimer = 0;
         setComboTimer = false;
         StartCoroutine(cameraShake.Shake(.4f, .4f));
     }
-    public void SmashDisappear()
+    public void SwishAppear()
     {
-
-        StartCoroutine(SmashDisappearCoroutine());
-    }
-    IEnumerator SmashDisappearCoroutine()
-    {
-        yield return new WaitForSeconds(1f);
-        attack3Effect.SetActive(false);
-        attackCollider = false;
+        sfx.clip = Resources.Load<AudioClip>("SoundMusic/whoosh3");
+        sfx.Play();
+        currMana -= swishCost;
+        bigSlash.SetActive(true);
+        nextSwish = Time.time + swishCooldown;
+        swishFillTimeStamp = Time.time;
     }
     public void StartComboTimer() { setComboTimer = true; }
 
 
     void OnCollisionEnter2D(Collision2D col)
     {
-        if (col.gameObject.tag == "enemy" || col.gameObject.tag == "trap")
+        if (col.gameObject.tag == "enemy" || col.gameObject.tag == "trap" || col.gameObject.tag == "bullet")
         {
+            if (isAttacking == true && attackState == 3) return;
+            if (col.gameObject.transform.position.x > transform.position.x) knockFromRight = true;
+            else knockFromRight = false;
             Hurt();
+
             StartCoroutine(FlashDamage());
         }
     }
@@ -557,16 +582,19 @@ public class MuniaControllerScript : MonoBehaviour {
     }
     public void Hurt()
     {
-
+        setComboTimer = false;
+        comboTimer = 0;
+        if (attackState != 3) attackState = 0;
+        setAttackTimer = false;
+        reAttackTimer = 0;
+        anim.SetBool("attackQueue", false);
+        SlashDisappear();
+        PushDisappear();
         currHealth -= 1;
         ratio = currHealth / maxHealth;
         index = Random.Range(0,hurtClips.Length);
         voiceSource.clip = hurtClips[index];
         voiceSource.Play();
-        
-    }
-    public void KnockBack()
-    {
         knockbackBool = true;
         anim.SetTrigger("hurt");
         if (knockFromRight == true)
@@ -577,24 +605,10 @@ public class MuniaControllerScript : MonoBehaviour {
         {
             rb.velocity = new Vector2(knockback, knockback);
         }
-        
+
         StartCoroutine(KnockbackStun());
     }
-    void AttackColliding()
-    {
-        Collider2D[] enemiesToDamage = null;
-        if (attackState == 1) enemiesToDamage = Physics2D.OverlapCircleAll(attackPos.position, attackRange, whatIsEnemy);
-        if (attackState == 2) enemiesToDamage = Physics2D.OverlapAreaAll(corner1.position, corner2.position, whatIsEnemy);
-        if (enemiesToDamage.Length > 0)
-        {
-
-            for (int i = 0; i < enemiesToDamage.Length; i++)
-            {
-                enemiesToDamage[i].GetComponent<enemyScript>().TakeDamage();
-            }
-            attackCollider = false;
-        }
-    }
+    
     IEnumerator KnockbackStun() {
         Physics2D.IgnoreLayerCollision(8, 10, true);
         Physics2D.IgnoreLayerCollision(8, 14, true);

@@ -43,7 +43,7 @@ GameObject:
   - component: {fileID: 114277444143804340}
   m_Layer: 8
   m_Name: Munia
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -458,6 +458,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abd5ff3ca856d9944b48791107f55e6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  GameOverScreen: {fileID: 0}
   maxSpeed: 10
   psprite: {fileID: 212959095346957014}
   attackClips:
@@ -469,8 +470,12 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 0e47d9f3710c0a04487489ac7b879938, type: 3}
   - {fileID: 8300000, guid: 0da9c7f61ec377448acfc9932f4d6a1d, type: 3}
   - {fileID: 8300000, guid: 2a428aecaae8ecc47a7926d21ecd4a8e, type: 3}
+  hurtClips: []
   voiceSource: {fileID: 82771591664411310}
+  voiceSwish: {fileID: 0}
   lol: {fileID: 82468263002252782}
+  sfx: {fileID: 0}
+  facingRight: 1
   feetPos: {fileID: 4315370406161622}
   checkRadius: 0.3
   whatIsGround:
@@ -478,7 +483,48 @@ MonoBehaviour:
     m_Bits: 512
   jumpForce: 17.5
   jumpTime: 0.35
+  attackPos: {fileID: 0}
+  attackRange: 0
+  corner1: {fileID: 0}
+  corner2: {fileID: 0}
+  whatIsEnemy:
+    serializedVersion: 2
+    m_Bits: 0
+  cameraShake: {fileID: 0}
+  attack1Effect: {fileID: 0}
+  attack2Effect: {fileID: 0}
+  attack3Effect: {fileID: 0}
+  forcefield: {fileID: 0}
+  bigSlash: {fileID: 0}
+  knockback: 0
+  knockFromRight: 0
+  dashWindow: 0.2
+  dashSpeed: 0
+  party: {fileID: 0}
+  maxHealth: 6
+  currHealth: 6
+  maxMana: 100
+  currMana: 0
+  blockManaRate: 0.3
+  ManaRegenRate: 0.1
+  dashCost: 15
+  smashCost: 25
+  swishCost: 25
+  isAttacking: 0
+  attackState: 0
+  comboWindow: 0.4
+  reAttackWindow: 0.35
+  attackDelay: 1
+  shardsCollected: 0
+  shards:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  ImageHealth: {fileID: 0}
+  ImageMana: {fileID: 0}
+  lerpSpeed: 4
   ObjectPool: {fileID: 0}
+  whatever: {fileID: 0}
 --- !u!212 &212959095346957014
 SpriteRenderer:
   m_ObjectHideFlags: 1

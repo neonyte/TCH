@@ -395,7 +395,7 @@ public class MuniaControllerScriptKeys : MonoBehaviour
 
                 for (int i = 0; i < enemiesToDamage.Length; i++)
                 {
-                    enemiesToDamage[i].GetComponent<enemyScript>().TakeDamage();
+                    enemiesToDamage[i].GetComponent<enemyScript>().TakeDamage(1,3f);
                 }
                 attackCollider = false;
             }

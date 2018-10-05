@@ -22,16 +22,7 @@ public class FallTrap : MonoBehaviour {
     {
         if (coll.gameObject.name.Equals("Munia"))
         {
-            var player = coll.gameObject.GetComponent<MuniaControllerScript>();
-            if (player.transform.position.x < transform.position.x)
-            {
-                player.knockFromRight = true;
-            }
-            else
-            {
-                player.knockFromRight = false;
-            }
-            player.KnockBack();
+            
             Physics2D.IgnoreCollision(cd, mun, true);
             StartCoroutine(Disappear());
         }

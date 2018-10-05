@@ -8,6 +8,8 @@ TagManager:
   - enemy
   - Shard
   - trap
+  - bullet
+  - platform
   layers:
   - Default
   - TransparentFX
@@ -26,7 +28,7 @@ TagManager:
   - trap
   - Video
   - forcefield
-  - 
+  - bullet
   - 
   - 
   - 
@@ -47,6 +49,9 @@ TagManager:
     locked: 0
   - name: BGStuff
     uniqueID: 2315922031
+    locked: 0
+  - name: Effectsbehindplatform
+    uniqueID: 925294545
     locked: 0
   - name: Platforms
     uniqueID: 2011389847
