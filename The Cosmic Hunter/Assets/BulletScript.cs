@@ -31,10 +31,11 @@ public class BulletScript : MonoBehaviour
 
     void OnEnable()
     {
-        noDirection = false;
+        
         transform.position = pos.transform.position;
         target = new Vector3(munia.position.x, munia.position.y);
         normalizeDirection = (target - transform.position).normalized;
+        noDirection = false;
         StartCoroutine(Inactive(2.9f));
     }
     private void OnDisable()
@@ -45,6 +46,11 @@ public class BulletScript : MonoBehaviour
     {
         yield return new WaitForSeconds(timing);
         gameObject.SetActive(false);
+    }
+    public void Disappear(float time)
+    {
+        noDirection = true;
+        StartCoroutine(Inactive(time));
     }
     private void OnCollisionEnter2D(Collision2D col)
     {
@@ -61,8 +67,8 @@ public class BulletScript : MonoBehaviour
         }
         if (col.gameObject.name.Equals("forcefield") || (col.gameObject.tag == "platform") || (col.gameObject.tag == "trap")) 
         {
-            noDirection = true;
-            StartCoroutine(Inactive(0.01f)); 
+            Debug.Log("what");
+            Disappear(0.01f);
 
         }
 

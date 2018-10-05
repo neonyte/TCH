@@ -70,6 +70,9 @@ public class MuniaControllerScript : MonoBehaviour {
     public Image swishFill;
     float swishFillTimeStamp;
 
+    public Image attackFill;
+    float attackFillTimeStamp;
+
     public float maxHealth = 6;
     public float currHealth = 6;
     public float maxMana = 100;
@@ -263,7 +266,7 @@ public class MuniaControllerScript : MonoBehaviour {
                     attackState = 1;
                     Attack1();
                     
-                    nextAttack = Time.time + attackDelay;
+                    
                 }
             }
                 if (comboTimer > 0 && comboTimer <= comboWindow && attackState == 1)
@@ -277,7 +280,7 @@ public class MuniaControllerScript : MonoBehaviour {
 
                 Attack2();
                     anim.SetBool("attackQueue", true);
-                nextAttack = Time.time + attackDelay;
+                
             }
         }
        
@@ -303,6 +306,8 @@ public class MuniaControllerScript : MonoBehaviour {
         }
         if (comboTimer > comboWindow)
         {
+            nextAttack = Time.time + attackDelay;
+            attackFillTimeStamp = Time.time;
             setComboTimer = false;
             comboTimer = 0;
             if(attackState!=3) attackState = 0;
@@ -446,13 +451,16 @@ public class MuniaControllerScript : MonoBehaviour {
         if (Time.time > nextSwish) swishFill.fillAmount = 0;
         else swishFill.fillAmount = (nextSwish - Time.time) / (nextSwish - swishFillTimeStamp);
 
-        whatever.text = " // " + blockFillTimeStamp + " // " + nextBlock + " //  " + blockFill.fillAmount + " // "+Time.time;
+        if (Time.time > nextAttack) attackFill.fillAmount = 0;
+        else attackFill.fillAmount = (nextAttack - Time.time) / (nextAttack - attackFillTimeStamp);
+
+        whatever.text = " // " + attackState + " // " +comboTimer + " //  " + reAttackTimer + " // "+Time.time;
 
         //END OF UPDATE
         //END OF UPDATE
         //END OF UPDATE
     }
-
+    
     public bool CanSpendMana(float cost)
     {
         if (cost < currMana)

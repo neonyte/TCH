@@ -23,9 +23,9 @@ public class enemyScript : MonoBehaviour {
     Shader shaderSpritesDefault;
     Shader[] shaders = { null, null };
     public bool canBeSmashed = true;
-    bool isDying = false;
+    public bool isDying = false;
     public bool dieTrigger = false;
-
+    public float deathTime;
 
 
     private void Start()
@@ -75,7 +75,7 @@ public class enemyScript : MonoBehaviour {
             }
             StartCoroutine(MoveDelay(1.5f));
         }
-        if (col.gameObject.name.Equals("forcefield"))
+        if (col.gameObject.name.Equals("forcefield") && health >0)
         {
             StartCoroutine(MoveDelay(1f));
             StartCoroutine(Knockback(0,8f));
@@ -116,7 +116,7 @@ public class enemyScript : MonoBehaviour {
             spriteR.material.shader = shaderSpritesDefault;
             Physics2D.IgnoreCollision(circle, munia.GetComponent<Collider2D>(), true);
             
-            Destroy(gameObject, this.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length+0.5f);
+            Destroy(gameObject, this.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length+deathTime);
         }
     }
     public void TriggerFlip()

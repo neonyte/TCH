@@ -194,7 +194,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1630339052705260}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -13.87, y: 6.8953066, z: 0}
+  m_LocalPosition: {x: -31.58, y: 1.56, z: 0}
   m_LocalScale: {x: 0.60938, y: 0.60938, z: 0.60938}
   m_Children:
   - {fileID: 4814089119775288}
@@ -223,7 +223,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1486904221330550}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 24.59, y: 7.04, z: 0}
+  m_LocalPosition: {x: 28.58, y: 4.95, z: 0}
   m_LocalScale: {x: 1.982835, y: 1.982835, z: 1.982835}
   m_Children:
   - {fileID: 4507032014416976}
@@ -517,6 +517,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 1
+  orbitAnimator: {fileID: 95249174625019498}
+  anim: {fileID: 0}
   bullet: {fileID: 1211043962706820}
 --- !u!114 &114985794462614508
 MonoBehaviour:
@@ -530,7 +532,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   facingRight: 0
-  health: 3
+  health: 2
   munia: {fileID: 0}
   toAttack: 0
   triggerColliding: 0
@@ -539,7 +541,9 @@ MonoBehaviour:
   willMove: 1
   rb: {fileID: 0}
   canBeSmashed: 1
+  isDying: 0
   dieTrigger: 0
+  deathTime: 2
 --- !u!198 &198414715332689734
 ParticleSystem:
   m_ObjectHideFlags: 1

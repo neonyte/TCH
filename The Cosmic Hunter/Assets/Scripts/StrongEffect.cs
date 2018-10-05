@@ -58,6 +58,10 @@ public class StrongEffect : MonoBehaviour {
                 }
             }
         }
+        if (collision.gameObject.name == "Bullet")
+        {
+            collision.gameObject.GetComponent<BulletScript>().Disappear(0.01f);
+        }
     }
     void Flip() //direction facing
     {

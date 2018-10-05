@@ -361,7 +361,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   facingRight: 0
-  health: 4
+  health: 5
   munia: {fileID: 0}
   toAttack: 0
   triggerColliding: 0
@@ -370,7 +370,9 @@ MonoBehaviour:
   willMove: 1
   rb: {fileID: 0}
   canBeSmashed: 1
+  isDying: 0
   dieTrigger: 0
+  deathTime: 1
 --- !u!212 &212475107541932860
 SpriteRenderer:
   m_ObjectHideFlags: 1
