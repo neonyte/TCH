@@ -11,13 +11,16 @@ public class triggerDialogue : MonoBehaviour {
         {
             dialogueBox.SetActive(true);
             sprite.sprite = Resources.Load<Sprite>("Images/Objects/TutorialArea/Dialogue trigger On");
+            
         }
+
     }
     private void OnTriggerExit2D(Collider2D col)
     {
         if (col.gameObject.name == "Munia")
         {
             dialogueBox.SetActive(false);
+            col.GetComponent<MuniaControllerScript>().currentCheckpoint = transform;
         }
     }
 }

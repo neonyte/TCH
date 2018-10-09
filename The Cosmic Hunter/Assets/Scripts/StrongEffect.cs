@@ -58,9 +58,14 @@ public class StrongEffect : MonoBehaviour {
                 }
             }
         }
-        if (collision.gameObject.name == "Bullet")
+        if (collision.gameObject.tag == "bullet")
         {
             collision.gameObject.GetComponent<BulletScript>().Disappear(0.01f);
+        }
+        if (collision.gameObject.tag == "beacon")
+        {
+            BeaconScript bs = collision.gameObject.GetComponent<BeaconScript>();
+            bs.TakeDamage(2);
         }
     }
     void Flip() //direction facing

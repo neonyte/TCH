@@ -89,7 +89,7 @@ public class enemyScript : MonoBehaviour {
         yield return new WaitForSeconds(seconds);
         canMove = true;
     }
-    public void TakeDamage(int h, float k)
+    public void TakeDamage(int h, float knock)
     {
         if (health > 0)
         {
@@ -103,8 +103,8 @@ public class enemyScript : MonoBehaviour {
         {
             StartCoroutine(MoveDelay(0.5f));
             StartCoroutine(Flashing());
-            StopCoroutine(Knockback(0.2f,k));
-            StartCoroutine(Knockback(0.2f,k));
+            StopCoroutine(Knockback(0.2f,knock));
+            StartCoroutine(Knockback(0.2f,knock));
         }
         if (health <= 0 && isDying == false)
         {

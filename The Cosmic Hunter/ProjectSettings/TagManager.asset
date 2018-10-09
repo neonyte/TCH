@@ -10,6 +10,9 @@ TagManager:
   - trap
   - bullet
   - platform
+  - spike
+  - beacon
+  - victory
   layers:
   - Default
   - TransparentFX
@@ -31,7 +34,7 @@ TagManager:
   - bullet
   - effect
   - enemyeffect
-  - 
+  - spike
   - 
   - 
   - 
